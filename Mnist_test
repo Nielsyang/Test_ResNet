@@ -161,16 +161,47 @@ def main(_):
   # initial value which will be assigned when we call:
   # {tf.global_variables_initializer().run()}
   conv1_weights = tf.Variable(
-      tf.truncated_normal([5, 5, NUM_CHANNELS, 32],  # 5x5 filter, depth 32.
+      tf.truncated_normal([3, 3, NUM_CHANNELS, 32],  # 5x5 filter, depth 32.
                           stddev=0.1,
                           seed=SEED, dtype=data_type()))
   conv1_biases = tf.Variable(tf.zeros([32], dtype=data_type()))
   conv2_weights = tf.Variable(tf.truncated_normal(
-      [5, 5, 32, 64], stddev=0.1,
+      [3, 3, 32, 32], stddev=0.1,
       seed=SEED, dtype=data_type()))
-  conv2_biases = tf.Variable(tf.constant(0.1, shape=[64], dtype=data_type()))
+  conv2_biases = tf.Variable(tf.constant(0.1, shape=[32], dtype=data_type()))
+
+  conv3_weights = tf.Variable(
+      tf.truncated_normal([3, 3, 32, 64],  # 5x5 filter, depth 32.
+                          stddev=0.1,
+                          seed=SEED, dtype=data_type()))
+  conv3_biases = tf.Variable(tf.zeros([64], dtype=data_type()))
+  conv4_weights = tf.Variable(tf.truncated_normal(
+      [3, 3, 64, 64], stddev=0.1,
+      seed=SEED, dtype=data_type()))
+  conv4_biases = tf.Variable(tf.constant(0.1, shape=[64], dtype=data_type()))
+
+  conv5_weights = tf.Variable(
+      tf.truncated_normal([3, 3, 64, 64],  # 5x5 filter, depth 32.
+                          stddev=0.1,
+                          seed=SEED, dtype=data_type()))
+  conv5_biases = tf.Variable(tf.zeros([64], dtype=data_type()))
+  conv6_weights = tf.Variable(tf.truncated_normal(
+      [3, 3, 64, 128], stddev=0.1,
+      seed=SEED, dtype=data_type()))
+  conv6_biases = tf.Variable(tf.constant(0.1, shape=[128], dtype=data_type()))
+
+  conv7_weights = tf.Variable(
+      tf.truncated_normal([3, 3, 128, 128],  # 5x5 filter, depth 32.
+                          stddev=0.1,
+                          seed=SEED, dtype=data_type()))
+  conv7_biases = tf.Variable(tf.zeros([128], dtype=data_type()))
+  # conv8_weights = tf.Variable(tf.truncated_normal(
+  #     [3, 3, 128, 128], stddev=0.1,
+  #     seed=SEED, dtype=data_type()))
+  # conv8_biases = tf.Variable(tf.constant(0.1, shape=[128], dtype=data_type()))
+
   fc1_weights = tf.Variable(  # fully connected, depth 512.
-      tf.truncated_normal([IMAGE_SIZE // 4 * IMAGE_SIZE // 4 * 64, 512],
+      tf.truncated_normal([IMAGE_SIZE // 4 * IMAGE_SIZE // 4 * 128, 512],
                           stddev=0.1,
                           seed=SEED,
                           dtype=data_type()))
@@ -208,24 +239,81 @@ def main(_):
                         padding='SAME')
     # Bias and rectified linear non-linearity.
     relu = tf.nn.relu(tf.nn.bias_add(conv, conv1_biases))
-    # Max pooling. The kernel size spec {ksize} also follows the layout of
-    # the data. Here we have a pooling window of 2, and a stride of 2.
+    conv = tf.nn.conv2d(relu,
+                        conv2_weights,
+                        strides=[1, 1, 1, 1],
+                        padding='SAME')
+    # Bias and rectified linear non-linearity.
+    relu = tf.nn.relu(tf.nn.bias_add(conv, conv2_biases))
     pool = tf.nn.max_pool(relu,
                           ksize=[1, 2, 2, 1],
                           strides=[1, 2, 2, 1],
                           padding='SAME')
     conv = tf.nn.conv2d(pool,
-                        conv2_weights,
+                        conv3_weights,
                         strides=[1, 1, 1, 1],
                         padding='SAME')
-    relu = tf.nn.relu(tf.nn.bias_add(conv, conv2_biases))
+    # Bias and rectified linear non-linearity.
+    relu = tf.nn.relu(tf.nn.bias_add(conv, conv3_biases))
+    conv = tf.nn.conv2d(relu,
+                        conv4_weights,
+                        strides=[1, 1, 1, 1],
+                        padding='SAME')
+    # Bias and rectified linear non-linearity.
+    relu = tf.nn.relu(tf.nn.bias_add(conv, conv4_biases))
+    conv = tf.nn.conv2d(relu,
+                        conv5_weights,
+                        strides=[1, 1, 1, 1],
+                        padding='SAME')
+    # Bias and rectified linear non-linearity.
+    relu = tf.nn.relu(tf.nn.bias_add(conv, conv5_biases))
+    conv = tf.nn.conv2d(relu,
+                        conv6_weights,
+                        strides=[1, 1, 1, 1],
+                        padding='SAME')
+    # Bias and rectified linear non-linearity.
+    relu = tf.nn.relu(tf.nn.bias_add(conv, conv6_biases))
+    conv = tf.nn.conv2d(relu,
+                        conv7_weights,
+                        strides=[1, 1, 1, 1],
+                        padding='SAME')
+    # Bias and rectified linear non-linearity.
+    relu = tf.nn.relu(tf.nn.bias_add(conv, conv7_biases))
+    # conv = tf.nn.conv2d(relu,
+    #                     conv5_weights,
+    #                     strides=[1, 1, 1, 1],
+    #                     padding='SAME')
+    # # Bias and rectified linear non-linearity.
+    # relu = tf.nn.relu(tf.nn.bias_add(conv, conv5_biases))
+    # conv = tf.nn.conv2d(relu,
+    #                     conv6_weights,
+    #                     strides=[1, 1, 1, 1],
+    #                     padding='SAME')
+    # # Bias and rectified linear non-linearity.
+    # relu = tf.nn.relu(tf.nn.bias_add(conv, conv6_biases))
+    # Max pooling. The kernel size spec {ksize} also follows the layout of
+    # the data. Here we have a pooling window of 2, and a stride of 2.
+
+
+    # conv = tf.nn.conv2d(pool,
+    #                     conv7_weights,
+    #                     strides=[1, 1, 1, 1],
+    #                     padding='SAME')
+    # # Bias and rectified linear non-linearity.
+    # relu = tf.nn.relu(tf.nn.bias_add(conv, conv7_biases))
+    # conv = tf.nn.conv2d(relu,
+    #                     conv8_weights,
+    #                     strides=[1, 1, 1, 1],
+    #                     padding='SAME')
+    # # Bias and rectified linear non-linearity.
+    # relu = tf.nn.relu(tf.nn.bias_add(conv, conv8_biases))
     pool = tf.nn.max_pool(relu,
                           ksize=[1, 2, 2, 1],
                           strides=[1, 2, 2, 1],
                           padding='SAME')
     data_shape = data.get_shape().as_list()
     data_reshape = tf.reshape(data,[data_shape[0], data_shape[1]*data_shape[2]*data_shape[3]])
-    out = tf.nn.relu(tf.matmul(data_reshape, fc3_weights) + fc3_biases)  #增加一个额外的隐层
+    out = tf.nn.relu(tf.matmul(data_reshape, fc3_weights) + fc3_biases)
     # Reshape the feature map cuboid into a 2D matrix to feed it to the
     # fully connected layers.
     pool_shape = pool.get_shape().as_list()
@@ -249,9 +337,9 @@ def main(_):
 
   # L2 regularization for the fully connected parameters.
   regularizers = (tf.nn.l2_loss(fc1_weights) + tf.nn.l2_loss(fc1_biases) +
-                  tf.nn.l2_loss(fc2_weights) + tf.nn.l2_loss(fc2_biases) +
-                  tf.nn.l2_loss(fc3_weights) + tf.nn.l2_loss(fc3_biases) +
-                  tf.nn.l2_loss(fc4_weights) + tf.nn.l2_loss(fc4_biases))
+                  tf.nn.l2_loss(fc2_weights) + tf.nn.l2_loss(fc2_biases))
+                  # tf.nn.l2_loss(fc3_weights) + tf.nn.l2_loss(fc3_biases) +
+                  # tf.nn.l2_loss(fc4_weights) + tf.nn.l2_loss(fc4_biases))
   # Add the regularization term to the loss.
   loss += 5e-4 * regularizers
 
@@ -269,6 +357,11 @@ def main(_):
   optimizer = tf.train.MomentumOptimizer(learning_rate,
                                          0.9).minimize(loss,
                                                        global_step=batch)
+
+  # train_error = tf.Variable(0, dtype=data_type())
+
+  # train_error_vis = tf.scalar_summary("train_error", train_error)
+  # learning_rate_vis = tf.scalar_summary("learning_rate", learning_rate)
 
   # Predictions for the current training minibatch.
   train_prediction = tf.nn.softmax(logits)
@@ -304,6 +397,8 @@ def main(_):
     # Run all the initializers to prepare the trainable parameters.
     tf.global_variables_initializer().run()
     print('Initialized!')
+    # merged_summary_op = tf.merge_all()
+    # summary_writer = tf.train.SummaryWriter('/home/yy/mnist_logs', sess.graph)
     # Loop through training steps.
     for step in xrange(int(num_epochs * train_size) // BATCH_SIZE):
       # Compute the offset of the current minibatch in the data.
@@ -324,6 +419,7 @@ def main(_):
                                       feed_dict=feed_dict)
         elapsed_time = time.time() - start_time
         start_time = time.time()
+        # train_error = error_rate(eval_in_batches(train_data, sess), train_labels)
         print('Step %d (epoch %.2f), %.1f ms' %
               (step, float(step) * BATCH_SIZE / train_size,
                1000 * elapsed_time / EVAL_FREQUENCY))
@@ -332,9 +428,16 @@ def main(_):
         print('Validation error: %.1f%%' % error_rate(
             eval_in_batches(validation_data, sess), validation_labels))
         sys.stdout.flush()
+
+     #    summary_str = sess.run(merged_summary_op)
+    	# summary_writer.add_summary(summary_str, step)
+
+
     # Finally print the result!
     test_error = error_rate(eval_in_batches(test_data, sess), test_labels)
     print('Test error: %.1f%%' % test_error)
+    train_error = error_rate(eval_in_batches(train_data, sess), train_labels)
+    print('Train error: %.1f%%' % train_error)
     if FLAGS.self_test:
       print('test_error', test_error)
       assert test_error == 0.0, 'expected 0.0 test_error, got %.2f' % (
